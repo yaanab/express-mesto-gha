@@ -28,10 +28,10 @@ module.exports.deleteCard = (req, res) => {
       return res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
+      if (err.kind === 'ObjectId') {
         return res.status(400).send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' })
+      return res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -48,10 +48,10 @@ module.exports.likeCard = (req, res) => {
       return res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
+      if (err.kind === 'ObjectId') {
         return res.status(400).send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' })
+      return res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -68,9 +68,9 @@ module.exports.dislikeCard = (req, res) => {
       return res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
+      if (err.kind === 'ObjectId') {
         return res.status(400).send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' })
+      return res.status(500).send({ message: 'Произошла ошибка' });
     });
 };
