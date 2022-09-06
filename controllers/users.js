@@ -103,6 +103,7 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
+        { expiresIn: '7d' },
       );
       res
         .cookie('jwt', token, {
@@ -112,3 +113,11 @@ module.exports.login = (req, res, next) => {
     })
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      res.send({ data: user });
+    })
+    .catch(next);
+}
