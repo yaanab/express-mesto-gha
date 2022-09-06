@@ -24,8 +24,17 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res.status(404).send({ message: 'Карточка не найдена' });
+      } else if (card.owner.toString() !== req.user._id) {
+        return res.status(404).send({ message: 'Можно удалить только свою карточку' });
       }
-      return res.status(200).send({ card });
+      return card;
+    })
+    .then((card) => {
+      card.remove();
+      return card;
+    })
+    .then((card) => {
+      res.send({ card });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
