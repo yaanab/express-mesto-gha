@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -6,22 +8,45 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+module.exports.createUser = (req, res, next) => {
+  const {
+    email,
+    password,
+    name,
+    about,
+    avatar,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(200).send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      _id: user._id,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new Error('Данный email уже зарегестрирован');
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
-    });
+    })
+    .catch(next);
+
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
+    })
+      .then((user) => res.status(200).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+        _id: user._id,
+      }))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          return res.status(400).send({ message: 'Переданы некорректные данные' });
+        }
+        return res.status(500).send({ message: 'Произошла ошибка' });
+      }))
+    .catch(next);
 };
 
 module.exports.getUser = (req, res) => {
@@ -68,4 +93,22 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => res.status(200).send({ user }))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+      );
+      res
+        .cookie('jwt', token, {
+          httpOnly: true,
+        });
+      res.send({ token });
+    })
+    .catch(next);
 };
