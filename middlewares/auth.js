@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
   if (!token) {
     return res
       .status(401)
-      .send({ message: 'Нет токена' });
+      .send({ message: 'Нeобходима авторизация' });
   }
 
   try {
@@ -19,5 +19,5 @@ module.exports = (req, res, next) => {
 
   req.user = payload;
 
-  return next();
+  next();
 }
