@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -20,7 +20,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new Error('Данный email уже зарегестрирован');
+        return res.status(404).send({ message: 'Данный email уже зарегестрирован' });
       }
     })
     .catch(next);
@@ -110,5 +110,5 @@ module.exports.login = (req, res, next) => {
         });
       res.send({ token });
     })
-    .catch(next);
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
