@@ -31,21 +31,15 @@ module.exports.deleteCard = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Можно удалить только свою карточку');
       }
-      return card;
-    })
-    .then((card) => {
-      card.remove();
-      return card;
-    })
-    .then((card) => {
-      res.send({ card });
+      return res.send({ card });
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Некорректный ID');
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
