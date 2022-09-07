@@ -65,7 +65,7 @@ module.exports.getUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
+      if (err.name === 'CastError') {
         throw new BadRequestError('Невалидный ID пользователя');
       }
     })
