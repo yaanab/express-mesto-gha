@@ -1,11 +1,13 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-error');
+const ConflictError = require('../errors/conflict-error');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send({ users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .then((users) => res.send({ users }))
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -20,7 +22,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        return res.status(404).send({ message: 'Данный email уже зарегестрирован' });
+        throw new ConflictError('Данный email уже зарегестрирован');
       }
     })
     .catch(next);
@@ -32,67 +34,52 @@ module.exports.createUser = (req, res, next) => {
       name,
       about,
       avatar,
-    })
-      .then((user) => res.status(200).send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-        _id: user._id,
-      }))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          return res.status(400).send({ message: 'Переданы некорректные данные' });
-        }
-        return res.status(500).send({ message: 'Произошла ошибка' });
-      }))
+    }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    }))
     .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        const error = new NotFoundError('Пользователь не найден');
+        throw error;
       }
-      return res.status(200).send({
+      return res.send({
         name: user.name,
         about: user.about,
         avatar: user.avatar,
         _id: user._id,
       });
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return res.status(400).send({ message: 'Невалидный ID пользователя' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка' });
-    });
+    .catch(next);
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name: req.body.name, about: req.body.about },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(200).send({ user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' });
-      }
-      return res.status(500).send({ message: 'Произошла ошибка' });
-    });
+    .then((user) => res.send({ user }))
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(200).send({ user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .then((user) => res.send({ user }))
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -111,13 +98,13 @@ module.exports.login = (req, res, next) => {
         });
       res.send({ token });
     })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      res.send({ data: user });
+      res.send({ user });
     })
     .catch(next);
 }
