@@ -9,7 +9,6 @@ const cardRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { regex } = require('./utils/utils');
-const { errorStatusCode } = require('./errors/error-status-code');
 const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
@@ -18,7 +17,7 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(cookieParser());
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/signup', celebrate({
@@ -46,9 +45,8 @@ app.use('/', (req, res, next) => {
 
 app.use(errors());
 
-app.use((err, req, res) => {
-  const { statusCode = errorStatusCode(err), message } = err;
-
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
   res
     .status(statusCode)
     .send({
@@ -56,6 +54,7 @@ app.use((err, req, res) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {

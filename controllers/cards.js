@@ -1,10 +1,11 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
 const ForbiddenError = require('../errors/forbidden-error');
+const BadRequestError = require('../errors/bad-request-error');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
+    .then((cards) => res.send({ cards }))
     .catch(next);
 };
 
@@ -13,6 +14,11 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ card }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
+    })
     .catch(next);
 };
 
@@ -32,7 +38,12 @@ module.exports.deleteCard = (req, res, next) => {
       return card;
     })
     .then((card) => {
-      res.send({ data: card });
+      res.send({ card });
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
     })
     .catch(next);
 };
@@ -49,6 +60,11 @@ module.exports.likeCard = (req, res, next) => {
       }
       return res.send({ data: card });
     })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
+    })
     .catch(next);
 };
 
@@ -63,6 +79,11 @@ module.exports.dislikeCard = (req, res, next) => {
         throw new NotFoundError('Карточка не найдена');
       }
       return res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
     })
     .catch(next);
 };
