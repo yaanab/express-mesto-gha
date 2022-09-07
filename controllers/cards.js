@@ -4,7 +4,7 @@ const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send({ cards }))
+    .then((cards) => res.send({ data: cards }))
     .catch(next);
 };
 
@@ -32,7 +32,7 @@ module.exports.deleteCard = (req, res, next) => {
       return card;
     })
     .then((card) => {
-      res.send({ card });
+      res.send({ data: card });
     })
     .catch(next);
 };
@@ -47,7 +47,7 @@ module.exports.likeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       }
-      return res.send({ card });
+      return res.send({ data: card });
     })
     .catch(next);
 };
@@ -62,7 +62,7 @@ module.exports.dislikeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       }
-      return res.send({ card });
+      return res.send({ data: card });
     })
     .catch(next);
 };

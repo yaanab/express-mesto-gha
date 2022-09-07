@@ -6,7 +6,7 @@ const ConflictError = require('../errors/conflict-error');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ users }))
+    .then((users) => res.send({ data: users }))
     .catch(next);
 };
 
@@ -68,7 +68,7 @@ module.exports.updateUser = (req, res, next) => {
     { name: req.body.name, about: req.body.about },
     { new: true, runValidators: true },
   )
-    .then((user) => res.send({ user }))
+    .then((user) => res.send({ data: user }))
     .catch(next);
 };
 
@@ -78,7 +78,7 @@ module.exports.updateAvatar = (req, res, next) => {
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
-    .then((user) => res.send({ user }))
+    .then((user) => res.send({ data: user }))
     .catch(next);
 };
 
@@ -104,7 +104,7 @@ module.exports.login = (req, res, next) => {
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      res.send({ user });
+      res.send({ data: user });
     })
     .catch(next);
 };
