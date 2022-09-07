@@ -58,14 +58,15 @@ module.exports.likeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       }
-      return res.send({ data: card });
+      return res.send({ card });
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Некорректный ID');
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -78,12 +79,13 @@ module.exports.dislikeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       }
-      return res.send({ data: card });
+      return res.send({ card });
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Некорректный ID');
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
