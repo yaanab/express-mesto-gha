@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
@@ -107,4 +107,4 @@ module.exports.getCurrentUser = (req, res, next) => {
       res.send({ user });
     })
     .catch(next);
-}
+};
