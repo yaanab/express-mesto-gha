@@ -20,14 +20,6 @@ module.exports.createUser = (req, res, next) => {
     avatar,
   } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new ConflictError('Данный email уже зарегестрирован');
-      }
-    })
-    .catch(next);
-
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
@@ -44,11 +36,14 @@ module.exports.createUser = (req, res, next) => {
       _id: user._id,
     }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+      if (err.code === 11000) {
+        next(new ConflictError('Данный email уже зарегестрирован'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -66,7 +61,7 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Невалидный ID пользователя');
+        next(new BadRequestError('Некорректный ID пользователя'));
       } else {
         next(err);
       }
@@ -82,10 +77,11 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -97,10 +93,11 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные');
+        next(new BadRequestError('Переданы некорректные данные карточки'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.login = (req, res, next) => {
