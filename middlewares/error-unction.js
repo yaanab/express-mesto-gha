@@ -1,4 +1,4 @@
-module.exports.errorMessage = (err, req, res, next) => {
+module.exports.errorFunction = (err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
